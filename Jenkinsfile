@@ -12,7 +12,7 @@ pipeline {
         
         stage('Build - Compilation') {
             steps {
-                echo 'Démarrage de la compilation maintenant...'
+                echo 'Démarrage de la compilation maintenantss...'
                 // Exécuter la commande de compilation de votre projet (ex: Maven, Node, etc.)
                 // sh 'mvn clean install'
                 // sh 'npm install'
