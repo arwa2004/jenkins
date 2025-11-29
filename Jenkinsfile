@@ -6,10 +6,9 @@ pipeline {
     }
 
     environment {
-        SONAR_HOST_URL = 'http://localhost:9000'
-        // Si vous avez configuré un token SonarQube dans Jenkins :
-        // SONAR_TOKEN = credentials('sonar-token')
-    }
+    SONAR_HOST_URL = 'http://localhost:9000'
+    SONAR_TOKEN = credentials('sonar-token')
+}
 
     stages {
         stage('Checkout Git') {
@@ -46,13 +45,13 @@ pipeline {
         }
 
         stage('SonarQube Analysis') {
-            steps {
-                echo "📊 Analyse de la qualité du code avec SonarQube"
-                withSonarQubeEnv('sonarqube') {  // Nom de la configuration SonarQube dans Jenkins
-                    sh 'mvn sonar:sonar -Dsonar.projectKey=jenkins-project -Dsonar.projectName="Jenkins Project"'
-                }
-            }
+    steps {
+        echo "📊 Analyse de la qualité du code avec SonarQube"
+        withSonarQubeEnv('sonarqube') {
+            sh 'mvn sonar:sonar -Dsonar.projectKey=jenkins-arwa -Dsonar.projectName="Projet Arwa"'
         }
+    }
+}
 
         stage('Build Package') {
             steps {
