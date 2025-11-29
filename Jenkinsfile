@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     tools {
-        maven 'M3'  // Assurez-vous que Maven est configuré dans "Global Tool Configuration"
+        maven 'M2_HOME'  // Assurez-vous que Maven est configuré dans "Global Tool Configuration"
     }
 
     environment {
