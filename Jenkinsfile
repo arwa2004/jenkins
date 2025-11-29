@@ -1,37 +1,93 @@
 pipeline {
-    agent any 
+    agent any
+
+    tools {
+        maven 'M3'  // Assurez-vous que Maven est configuré dans Jenkins
+    }
+
+    environment {
+        SONAR_HOST_URL = 'http://localhost:9000'
+        // Ajoutez votre token SonarQube si nécessaire
+        // SONAR_AUTH_TOKEN = credentials('sonar-token')
+    }
 
     stages {
-        stage('Checkout') {
+        stage('Checkout Git') {
             steps {
-                // Cette étape est souvent faite automatiquement si vous utilisez 'Pipeline script from SCM'
-                // Mais vous pouvez utiliser la commande 'checkout scm' si besoin
-                echo 'Code source récupéré.'
+                echo "Récupération du projet depuis Git"
+                git branch: 'main', url: 'https://github.com/arwa2004/jenkins.git'
+                // Remplacez par votre URL Git
             }
         }
-        
-        stage('Build - Compilation') {
+
+        stage('Maven Clean') {
             steps {
-                echo 'Démarrage de la compilation maintenant...'
-                // Exécuter la commande de compilation de votre projet (ex: Maven, Node, etc.)
-                // sh 'mvn clean install'
-                // sh 'npm install'
+                echo "Nettoyage avec Maven"
+                sh 'mvn clean'
             }
         }
-        
-        stage('Test') {
+
+        stage('Maven Compile') {
             steps {
-                echo 'Exécution des tests unitaires...'
-                // Exécuter les commandes de test
-                // sh 'mvn test'
-                // sh 'npm test'
+                echo "Compilation avec Maven"
+                sh 'mvn compile'
             }
         }
-        
-        stage('Quality Gate (Optionnel)') {
+
+        stage('SonarQube Analysis') {
             steps {
-                echo 'Vérification de la qualité du code (ex: SonarQube).'
+                echo "Analyse de la qualité du code avec SonarQube"
+                sh 'mvn sonar:sonar -Dsonar.projectKey=mon-projet -Dsonar.projectName="Mon Projet"'
+                // Adaptez projectKey et projectName selon votre projet
             }
+        }
+
+        stage('Tests Unitaires') {
+            steps {
+                echo "Exécution des tests unitaires"
+                sh 'mvn test'
+            }
+        }
+
+        stage('Build Package') {
+            steps {
+                echo "Création du package"
+                sh 'mvn package -DskipTests'
+            }
+        }
+    }
+
+    post {
+        always {
+            // Archive les résultats des tests et rapports
+            junit 'target/surefire-reports/*.xml'
+            archiveArtifacts 'target/*.jar'
+            
+            // Sauvegarde les infos Git
+            script {
+                def commit = sh(script: 'git log -1 --pretty=format:"%H"', returnStdout: true).trim()
+                def author = sh(script: 'git log -1 --pretty=format:"%an"', returnStdout: true).trim()
+                def message = sh(script: 'git log -1 --pretty=format:"%s"', returnStdout: true).trim()
+
+                sh """
+                echo "Commit: ${commit}" > git-info.txt
+                echo "Author: ${author}" >> git-info.txt
+                echo "Message: ${message}" >> git-info.txt
+                """
+                archiveArtifacts 'git-info.txt'
+            }
+        }
+        success {
+            echo "Pipeline exécutée avec succès!"
+            // mail to: 'votre-email@example.com',
+            //      subject: "SUCCÈS - Pipeline ${env.JOB_NAME}",
+            //      body: "La build ${env.BUILD_NUMBER} a réussi."
+        }
+        failure {
+            echo "Pipeline a échoué!"
+            // mail to: 'votre-email@example.com',
+            //      subject: "ÉCHEC - Pipeline ${env.JOB_NAME}",
+            //      body: "La build ${env.BUILD_NUMBER} a échoué."
         }
     }
 }
