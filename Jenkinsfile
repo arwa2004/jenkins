@@ -94,7 +94,7 @@ pipeline {
             //      body: "La pipeline a réussi. Voir: ${env.BUILD_URL}"
         }
         failure {
-            echo "❌ Pipeline a échoué!"
+            echo "❌ Pipelinee a échoué!"
             // mail to: 'arwabenamar2004@gmail.com',
             //      subject: "ÉCHEC - Build ${env.JOB_NAME} #${env.BUILD_NUMBER}",
             //      body: "La pipeline a échoué. Voir: ${env.BUILD_URL}"
