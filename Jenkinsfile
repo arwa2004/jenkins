@@ -1,10 +1,10 @@
 pipeline {
     agent any
-
+/*
     tools {
         maven 'M2_HOME'  // Assurez-vous que Maven est configuré dans "Global Tool Configuration"
     }
-
+*/
     environment {
     SONAR_HOST_URL = 'http://localhost:9000'
     SONAR_TOKEN = credentials('sonar-token')
@@ -78,31 +78,28 @@ pipeline {
         }
     }
 
-    // ... Fin du bloc stages ...
-
     post {
         always {
             echo "📎 Archivage des artefacts"
-            // ENTOURER LES ÉTAPES DANS UN BLOC SCRIPT/NODE
-            script {
-                node {
-                    // Les étapes d'archivage et de shell doivent être ici
-                    archiveArtifacts artifacts: 'target/*.jar, github-info.txt', fingerprint: true, allowEmptyArchive: true 
-                    
-                    // Nettoyage (Il est important d'exécuter ceci DANS le contexte node)
-                    sh 'mvn clean'
-                }
-            }
+            archiveArtifacts artifacts: 'target/*.jar, github-info.txt', fingerprint: true, allowEmpty: true
+            
+            // Nettoyage
+            sh 'mvn clean'
         }
         success {
             echo "✅ Pipeline exécutée avec succès!"
-            // Les étapes simples (comme echo) peuvent rester en dehors du script/node
+            // mail to: 'arwabenamar2004@gmail.com',
+            //      subject: "SUCCÈS - Build ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+            //      body: "La pipeline a réussi. Voir: ${env.BUILD_URL}"
         }
         failure {
             echo "❌Pipeline a échoué!"
+            // mail to: 'arwabenamar2004@gmail.com',
+            //      subject: "ÉCHEC - Build ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+            //      body: "La pipeline a échoué. Voir: ${env.BUILD_URL}"
         }
         changed {
             echo "🔄 Statut du build modifié"
-}
+ }
 }
 }
