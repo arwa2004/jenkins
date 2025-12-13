@@ -1,11 +1,11 @@
 pipeline {
     agent any
-/*
+
     tools {
         maven 'M2_HOME'  // Nom exact de votre config Maven
         jdk 'JAVA_HOME'     // Nom exact de votre config JDK
     }
-*/
+
     environment {
     SONAR_HOST_URL = 'http://localhost:9000'
     SONAR_TOKEN = credentials('sonar-token')
