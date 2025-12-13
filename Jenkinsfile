@@ -42,7 +42,7 @@ pipeline {
         stage('SonarQube Analysis') {
     steps {
         echo "📊 Analyse de la qualité du code avec SonarQube"
-        withSonarQubeEnv('sonarqube') {
+        withSonarQubeEnv('sonar-token') {
             sh 'mvn sonar:sonar -Dsonar.projectKey=jenkins-arwa -Dsonar.projectName="Projet Arwa"'
         }
     }
@@ -81,8 +81,7 @@ pipeline {
     post {
         always {
             echo "📎 Archivage des artefacts"
-            archiveArtifacts artifacts: 'target/*.jar,github-info.txt', fingerprint: true
-            archiveArtifacts 'github-info.txt'
+            archiveArtifacts artifacts: 'target/*.jar, github-info.txt', fingerprint: true, allowEmpty: true
             
             // Nettoyage
             sh 'mvn clean'
