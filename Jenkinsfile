@@ -101,6 +101,6 @@ pipeline {
         }
         changed {
             echo "🔄 Statut du build modifié"
-        }
-    }
+ }
+}
 }
