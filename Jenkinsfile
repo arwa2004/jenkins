@@ -47,7 +47,7 @@ pipeline {
             steps {
                 echo "📊 Analyse de la qualité du code avec SonarQube"
                 // L'argument doit être le NOM exact du serveur SonarQube dans Jenkins (Configuration du Système)
-                withSonarQubeEnv('sonar-token') { 
+                withSonarQubeEnv('sonarqube') { 
                     sh 'mvn sonar:sonar -Dsonar.projectKey=jenkins-arwa -Dsonar.projectName="Projet Arwa"'
                 }
             }
