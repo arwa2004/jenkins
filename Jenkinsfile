@@ -2,15 +2,19 @@ pipeline {
     agent any
 
     tools {
-        maven 'M2_HOME'  // Nom exact de votre config Maven
-        jdk 'JAVA_HOME'     // Nom exact de votre config JDK
+        maven 'M2_HOME'  // Assurez-vous que Maven est configuré dans "Global Tool Configuration"
     }
+
+    environment {
+    SONAR_HOST_URL = 'http://localhost:9000'
+    SONAR_TOKEN = credentials('sonar-token')
+}
 
     stages {
         stage('Checkout Git') {
             steps {
-                echo "🔄 Récupération du code depuis GitHub"
-                checkout scm
+                echo "🔄Récupération du code depuis GitHub"
+                checkout scm  // Utilise automatiquement le webhook
             }
         }
 
@@ -24,29 +28,30 @@ pipeline {
         stage('Maven Compile') {
             steps {
                 echo "🔨 Compilation du code"
-                sh 'mvn compile -Denforcer.skip=true'
+                sh 'mvn compile'
             }
         }
 
         stage('Tests Unitaires') {
-            steps {
-                echo "🧪 Exécution des tests"
-                sh 'mvn test -Denforcer.skip=true -DskipTests'
-            }
-        }
+    steps {
+        echo "🧪 Exécution des tests"
+        sh 'mvn test -DskipTests'  // SAUTE les tests pour l'instant
+    }
+}
 
-        // Stage SonarQube COMMENTÉ pour l'instant
-        // stage('SonarQube Analysis') {
-        //     steps {
-        //         echo "📊 Analyse de la qualité du code avec SonarQube"
-        //         sh 'echo "SonarQube désactivé pour le moment"'
-        //     }
-        // }
+        stage('SonarQube Analysis') {
+    steps {
+        echo "📊 Analyse de la qualité du code avec SonarQube"
+        withSonarQubeEnv('sonarqube') {
+            sh 'mvn sonar:sonar -Dsonar.projectKey=jenkins-arwa -Dsonar.projectName="Projet Arwa"'
+        }
+    }
+}
 
         stage('Build Package') {
             steps {
                 echo "📦 Création du package JAR"
-                sh 'mvn package -Denforcer.skip=true -DskipTests'
+                sh 'mvn package -DskipTests'
             }
         }
 
@@ -77,15 +82,25 @@ pipeline {
         always {
             echo "📎 Archivage des artefacts"
             archiveArtifacts artifacts: 'target/*.jar,github-info.txt', fingerprint: true
+            archiveArtifacts 'github-info.txt'
             
-            // Nettoyage (optionnel)
-            // sh 'mvn clean'
+            // Nettoyage
+            sh 'mvn clean'
         }
         success {
             echo "✅ Pipeline exécutée avec succès!"
+            // mail to: 'arwabenamar2004@gmail.com',
+            //      subject: "SUCCÈS - Build ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+            //      body: "La pipeline a réussi. Voir: ${env.BUILD_URL}"
         }
         failure {
             echo "❌ Pipeline a échoué!"
+            // mail to: 'arwabenamar2004@gmail.com',
+            //      subject: "ÉCHEC - Build ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+            //      body: "La pipeline a échoué. Voir: ${env.BUILD_URL}"
         }
-    }
+        changed {
+            echo "🔄 Statut du build modifié"
+        }
+    }
 }
