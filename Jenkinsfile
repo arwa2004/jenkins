@@ -79,13 +79,7 @@ pipeline {
     }
 
     post {
-        always {
-            echo "📎 Archivage des artefacts"
-            archiveArtifacts artifacts: 'target/*.jar,github-info.txt', fingerprint: true
-            
-            // Nettoyage (optionnel)
-            // sh 'mvn clean'
-        }
+        
         success {
             echo "✅ Pipeline exécutée avec succès!"
         }
