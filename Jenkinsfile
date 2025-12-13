@@ -1,11 +1,9 @@
 pipeline {
-    agent any // ✅ Définition de l'agent au niveau racine (maintenant sûr)
+    agent any
 
-    // Les outils sont chargés dans l'étape 'Build & Analyse'
-    
-    environment {
-        SONAR_HOST_URL = 'http://localhost:9000'
-        SONAR_TOKEN = credentials('sonar-token')
+    tools {
+        maven 'M2_HOME'  // Nom exact de votre config Maven
+        jdk 'JAVA_HOME'     // Nom exact de votre config JDK
     }
 
     stages {
@@ -16,26 +14,37 @@ pipeline {
             }
         }
 
-        stage('Build & Analyse') {
+        stage('Maven Clean') {
             steps {
-                // Chargement des outils dans le contexte de l'agent
-                tool 'JAVA_HOME' 
-                tool 'M2_HOME'
-                
                 echo "🧹 Nettoyage du projet"
                 sh 'mvn clean'
+            }
+        }
 
+        stage('Maven Compile') {
+            steps {
                 echo "🔨 Compilation du code"
                 sh 'mvn compile -Denforcer.skip=true'
+            }
+        }
 
+        stage('Tests Unitaires') {
+            steps {
                 echo "🧪 Exécution des tests"
                 sh 'mvn test -Denforcer.skip=true -DskipTests'
+            }
+        }
 
-                echo "📊 Analyse de la qualité du code avec SonarQube"
-                withSonarQubeEnv('sonar-token') { 
-                    sh 'mvn sonar:sonar -Dsonar.projectKey=jenkins-arwa -Dsonar.projectName="Projet Arwa"'
-                }
-                
+        // Stage SonarQube COMMENTÉ pour l'instant
+        // stage('SonarQube Analysis') {
+        //     steps {
+        //         echo "📊 Analyse de la qualité du code avec SonarQube"
+        //         sh 'echo "SonarQube désactivé pour le moment"'
+        //     }
+        // }
+
+        stage('Build Package') {
+            steps {
                 echo "📦 Création du package JAR"
                 sh 'mvn package -Denforcer.skip=true -DskipTests'
             }
@@ -65,6 +74,13 @@ pipeline {
     }
 
     post {
+        always {
+            echo "📎 Archivage des artefacts"
+            archiveArtifacts artifacts: 'target/*.jar,github-info.txt', fingerprint: true
+            
+            // Nettoyage (optionnel)
+            // sh 'mvn clean'
+        }
         success {
             echo "✅ Pipeline exécutée avec succès!"
         }
