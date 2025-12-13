@@ -1,16 +1,18 @@
 pipeline {
     agent any
 
+    // Les outils sont définis ici car nous avons confirmé que cette structure fonctionne sur votre agent.
     tools {
-        maven 'M2_HOME'  // Nom exact de votre config Maven
-        jdk 'JAVA_HOME'     // Nom exact de votre config JDK
+        maven 'M2_HOME'  // Nom exact de votre configuration Maven
+        jdk 'JAVA_HOME'  // Nom exact de votre configuration JDK
     }
 
-environment {
-
+    environment {
+        // Ajout de l'URL du serveur SonarQube pour le scan Maven
         SONAR_HOST_URL = 'http://localhost:9000' 
-
+        // Le token est géré via la configuration du serveur (dans withSonarQubeEnv)
     }
+
     stages {
         stage('Checkout Git') {
             steps {
@@ -40,13 +42,16 @@ environment {
             }
         }
 
-        // Stage SonarQube COMMENTÉ pour l'instant
-        // stage('SonarQube Analysis') {
-        //     steps {
-        //         echo "📊 Analyse de la qualité du code avec SonarQube"
-        //         sh 'echo "SonarQube désactivé pour le moment"'
-        //     }
-        // }
+        // 🚀 Intégration SonarQube
+        stage('SonarQube Analysis') {
+            steps {
+                echo "📊 Analyse de la qualité du code avec SonarQube"
+                // L'argument doit être le NOM exact du serveur SonarQube dans Jenkins (Configuration du Système)
+                withSonarQubeEnv('sonar-token') { 
+                    sh 'mvn sonar:sonar -Dsonar.projectKey=jenkins-arwa -Dsonar.projectName="Projet Arwa"'
+                }
+            }
+        }
 
         stage('Build Package') {
             steps {
