@@ -1,13 +1,11 @@
 pipeline {
     agent any
 
-    // ❌ SUPPRIMER CE BLOC (C'EST LA CAUSE DE L'ÉCHEC)
-    // tools {
-    //     maven 'M2_HOME'
-    //     jdk 'JAVA_HOME'
-    // } 
+    // Les outils (Maven/JDK) ne sont PLUS définis ici. 
+    // Ils seront chargés plus tard dans l'étape "Build & Analyse" (étape 2).
     
     environment {
+        // Ces variables sont nécessaires pour l'analyse SonarQube
         SONAR_HOST_URL = 'http://localhost:9000'
         SONAR_TOKEN = credentials('sonar-token')
     }
@@ -22,7 +20,7 @@ pipeline {
 
         stage('Build & Analyse') {
             steps {
-                // ✅ CHARGEMENT DES OUTILS DANS LE BLOC STEPS
+                // ✅ CHARGEMENT DES OUTILS dans le contexte de l'agent
                 tool 'JAVA_HOME' 
                 tool 'M2_HOME'
                 
@@ -36,7 +34,7 @@ pipeline {
                 sh 'mvn test -Denforcer.skip=true -DskipTests'
 
                 echo "📊 Analyse de la qualité du code avec SonarQube"
-                // ✅ RÉACTIVATION DE L'ANALYSE SONARQUBE AVEC LE NOM DE SERVEUR CORRECT
+                // ✅ Intégration de SonarQube
                 withSonarQubeEnv('sonar-token') { 
                     sh 'mvn sonar:sonar -Dsonar.projectKey=jenkins-arwa -Dsonar.projectName="Projet Arwa"'
                 }
@@ -69,8 +67,8 @@ pipeline {
         }
     }
 
-    // Le post est minimal, car nous avons retiré l'archivage
     post {
+        // Le post est minimal et ne fait que rapporter le statut
         success {
             echo "✅ Pipeline exécutée avec succès!"
         }
