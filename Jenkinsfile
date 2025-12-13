@@ -80,12 +80,13 @@ pipeline {
 
     post {
         always {
-            echo "📎 Archivage des artefacts"
-            archiveArtifacts artifacts: 'target/*.jar, github-info.txt', fingerprint: true, allowEmpty: true
-            
-            // Nettoyage
-            sh 'mvn clean'
-        }
+        echo "📎 Archivage des artefacts"
+        // Correction de la syntaxe ici (et on ne met qu'une seule fois l'étape)
+        archiveArtifacts artifacts: 'target/*.jar, github-info.txt', fingerprint: true, allowEmptyArchive: true 
+        
+        // Nettoyage
+        sh 'mvn clean'
+    }
         success {
             echo "✅ Pipeline exécutée avec succès!"
             // mail to: 'arwabenamar2004@gmail.com',
