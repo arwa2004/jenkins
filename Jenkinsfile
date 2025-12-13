@@ -1,8 +1,7 @@
 pipeline {
-    // ❌ L'agent est retiré d'ici
-    // agent any 
+    agent any // ✅ Définition de l'agent au niveau racine (maintenant sûr)
 
-    // Les outils sont retirés d'ici (comme décidé)
+    // Les outils sont chargés dans l'étape 'Build & Analyse'
     
     environment {
         SONAR_HOST_URL = 'http://localhost:9000'
@@ -10,8 +9,6 @@ pipeline {
     }
 
     stages {
-        agent any // ✅ DÉFINITION DE L'AGENT AU NIVEAU DES STAGES
-
         stage('Checkout Git') {
             steps {
                 echo "🔄 Récupération du code depuis GitHub"
@@ -21,6 +18,7 @@ pipeline {
 
         stage('Build & Analyse') {
             steps {
+                // Chargement des outils dans le contexte de l'agent
                 tool 'JAVA_HOME' 
                 tool 'M2_HOME'
                 
@@ -42,8 +40,7 @@ pipeline {
                 sh 'mvn package -Denforcer.skip=true -DskipTests'
             }
         }
-        
-        // ... (Conservez l'étape 'Save Git Info') ...
+
         stage('Save Git Info') {
             steps {
                 echo "💾 Sauvegarde des informations Git"
