@@ -1,16 +1,16 @@
 pipeline {
     agent any
 
-    tools {
-        maven 'M2_HOME'  // Nom exact de votre config Maven
-        jdk 'JAVA_HOME'     // Nom exact de votre config JDK
-    }
-
+    // ❌ SUPPRIMER CE BLOC (C'EST LA CAUSE DE L'ÉCHEC)
+    // tools {
+    //     maven 'M2_HOME'
+    //     jdk 'JAVA_HOME'
+    // } 
+    
     environment {
-    SONAR_HOST_URL = 'http://localhost:9000'
-    SONAR_TOKEN = credentials('sonar-token')
-}
-
+        SONAR_HOST_URL = 'http://localhost:9000'
+        SONAR_TOKEN = credentials('sonar-token')
+    }
 
     stages {
         stage('Checkout Git') {
@@ -20,36 +20,27 @@ pipeline {
             }
         }
 
-        stage('Maven Clean') {
+        stage('Build & Analyse') {
             steps {
+                // ✅ CHARGEMENT DES OUTILS DANS LE BLOC STEPS
+                tool 'JAVA_HOME' 
+                tool 'M2_HOME'
+                
                 echo "🧹 Nettoyage du projet"
                 sh 'mvn clean'
-            }
-        }
 
-        stage('Maven Compile') {
-            steps {
                 echo "🔨 Compilation du code"
                 sh 'mvn compile -Denforcer.skip=true'
-            }
-        }
 
-        stage('Tests Unitaires') {
-            steps {
                 echo "🧪 Exécution des tests"
                 sh 'mvn test -Denforcer.skip=true -DskipTests'
-            }
-        }
 
-        stage('SonarQube Analysis') {
-             steps {
-                 echo "📊 Analyse de la qualité du code avec SonarQube"
-                 sh 'echo "SonarQube désactivé pour le moment"'
-             }
-         }
-
-        stage('Build Package') {
-            steps {
+                echo "📊 Analyse de la qualité du code avec SonarQube"
+                // ✅ RÉACTIVATION DE L'ANALYSE SONARQUBE AVEC LE NOM DE SERVEUR CORRECT
+                withSonarQubeEnv('sonar-token') { 
+                    sh 'mvn sonar:sonar -Dsonar.projectKey=jenkins-arwa -Dsonar.projectName="Projet Arwa"'
+                }
+                
                 echo "📦 Création du package JAR"
                 sh 'mvn package -Denforcer.skip=true -DskipTests'
             }
@@ -78,8 +69,8 @@ pipeline {
         }
     }
 
+    // Le post est minimal, car nous avons retiré l'archivage
     post {
-        
         success {
             echo "✅ Pipeline exécutée avec succès!"
         }
