@@ -6,6 +6,11 @@ pipeline {
         jdk 'JAVA_HOME'     // Nom exact de votre config JDK
     }
 
+environment {
+
+        SONAR_HOST_URL = 'http://localhost:9000' 
+
+    }
     stages {
         stage('Checkout Git') {
             steps {
