@@ -1,10 +1,16 @@
 pipeline {
     agent any
-
+/*
     tools {
         maven 'M2_HOME'  // Nom exact de votre config Maven
         jdk 'JAVA_HOME'     // Nom exact de votre config JDK
     }
+*/
+    environment {
+    SONAR_HOST_URL = 'http://localhost:9000'
+    SONAR_TOKEN = credentials('sonar-token')
+}
+
 
     stages {
         stage('Checkout Git') {
@@ -35,13 +41,12 @@ pipeline {
             }
         }
 
-        // Stage SonarQube COMMENTÉ pour l'instant
-        // stage('SonarQube Analysis') {
-        //     steps {
-        //         echo "📊 Analyse de la qualité du code avec SonarQube"
-        //         sh 'echo "SonarQube désactivé pour le moment"'
-        //     }
-        // }
+        stage('SonarQube Analysis') {
+             steps {
+                 echo "📊 Analyse de la qualité du code avec SonarQube"
+                 sh 'echo "SonarQube désactivé pour le moment"'
+             }
+         }
 
         stage('Build Package') {
             steps {
