@@ -1,16 +1,17 @@
 pipeline {
-    agent any
+    // ❌ L'agent est retiré d'ici
+    // agent any 
 
-    // Les outils (Maven/JDK) ne sont PLUS définis ici. 
-    // Ils seront chargés plus tard dans l'étape "Build & Analyse" (étape 2).
+    // Les outils sont retirés d'ici (comme décidé)
     
     environment {
-        // Ces variables sont nécessaires pour l'analyse SonarQube
         SONAR_HOST_URL = 'http://localhost:9000'
         SONAR_TOKEN = credentials('sonar-token')
     }
 
     stages {
+        agent any // ✅ DÉFINITION DE L'AGENT AU NIVEAU DES STAGES
+
         stage('Checkout Git') {
             steps {
                 echo "🔄 Récupération du code depuis GitHub"
@@ -20,7 +21,6 @@ pipeline {
 
         stage('Build & Analyse') {
             steps {
-                // ✅ CHARGEMENT DES OUTILS dans le contexte de l'agent
                 tool 'JAVA_HOME' 
                 tool 'M2_HOME'
                 
@@ -34,7 +34,6 @@ pipeline {
                 sh 'mvn test -Denforcer.skip=true -DskipTests'
 
                 echo "📊 Analyse de la qualité du code avec SonarQube"
-                // ✅ Intégration de SonarQube
                 withSonarQubeEnv('sonar-token') { 
                     sh 'mvn sonar:sonar -Dsonar.projectKey=jenkins-arwa -Dsonar.projectName="Projet Arwa"'
                 }
@@ -43,7 +42,8 @@ pipeline {
                 sh 'mvn package -Denforcer.skip=true -DskipTests'
             }
         }
-
+        
+        // ... (Conservez l'étape 'Save Git Info') ...
         stage('Save Git Info') {
             steps {
                 echo "💾 Sauvegarde des informations Git"
@@ -68,7 +68,6 @@ pipeline {
     }
 
     post {
-        // Le post est minimal et ne fait que rapporter le statut
         success {
             echo "✅ Pipeline exécutée avec succès!"
         }
