@@ -78,29 +78,31 @@ pipeline {
         }
     }
 
+    // ... Fin du bloc stages ...
+
     post {
         always {
-        echo "📎 Archivage des artefacts"
-        // Correction de la syntaxe ici (et on ne met qu'une seule fois l'étape)
-        archiveArtifacts artifacts: 'target/*.jar, github-info.txt', fingerprint: true, allowEmptyArchive: true 
-        
-        // Nettoyage
-        sh 'mvn clean'
-    }
+            echo "📎 Archivage des artefacts"
+            // ENTOURER LES ÉTAPES DANS UN BLOC SCRIPT/NODE
+            script {
+                node {
+                    // Les étapes d'archivage et de shell doivent être ici
+                    archiveArtifacts artifacts: 'target/*.jar, github-info.txt', fingerprint: true, allowEmptyArchive: true 
+                    
+                    // Nettoyage (Il est important d'exécuter ceci DANS le contexte node)
+                    sh 'mvn clean'
+                }
+            }
+        }
         success {
             echo "✅ Pipeline exécutée avec succès!"
-            // mail to: 'arwabenamar2004@gmail.com',
-            //      subject: "SUCCÈS - Build ${env.JOB_NAME} #${env.BUILD_NUMBER}",
-            //      body: "La pipeline a réussi. Voir: ${env.BUILD_URL}"
+            // Les étapes simples (comme echo) peuvent rester en dehors du script/node
         }
         failure {
             echo "❌Pipeline a échoué!"
-            // mail to: 'arwabenamar2004@gmail.com',
-            //      subject: "ÉCHEC - Build ${env.JOB_NAME} #${env.BUILD_NUMBER}",
-            //      body: "La pipeline a échoué. Voir: ${env.BUILD_URL}"
         }
         changed {
             echo "🔄 Statut du build modifié"
- }
+}
 }
 }
