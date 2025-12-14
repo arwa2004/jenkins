@@ -62,7 +62,7 @@ SONAR_HOST_URL = 'http://10.0.2.15:32000'
 
         stage('Save Git Info') {
             steps {
-                echo "💾 Sauvegarde des informations Git"
+                echo "💾Sauvegarde des informations Git"
                 script {
                     def commit = sh(script: 'git log -1 --pretty=format:"%H"', returnStdout: true).trim()
                     def author = sh(script: 'git log -1 --pretty=format:"%an"', returnStdout: true).trim()
