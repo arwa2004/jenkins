@@ -9,7 +9,7 @@ pipeline {
 
     environment {
         // Ajout de l'URL du serveur SonarQube pour le scan Maven
-        SONAR_HOST_URL = 'http://localhost:9000' 
+SONAR_HOST_URL = 'http://10.0.2.15:32000'
         // Le token est géré via la configuration du serveur (dans withSonarQubeEnv)
     }
 
