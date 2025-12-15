@@ -9,7 +9,7 @@ pipeline {
 
     environment {
         // Ajout de l'URL du serveur SonarQube pour le scan Maven
-SONAR_HOST_URL = 'http://10.0.2.15:32000'
+        SONAR_HOST_URL = 'http://10.0.2.15:30900' 
         // Le token est géré via la configuration du serveur (dans withSonarQubeEnv)
     }
 
@@ -56,13 +56,12 @@ SONAR_HOST_URL = 'http://10.0.2.15:32000'
         stage('Build Package') {
             steps {
                 echo "📦 Création du package JAR"
-                sh 'mvn package -Denforcer.skip=true -DskipTests'
-            }
+	sh 'mvn test -Denforcer.skip=true'            }
         }
 
         stage('Save Git Info') {
             steps {
-                echo "💾Sauvegarde des informations Git"
+                echo "💾 Sauvegarde des informations Git"
                 script {
                     def commit = sh(script: 'git log -1 --pretty=format:"%H"', returnStdout: true).trim()
                     def author = sh(script: 'git log -1 --pretty=format:"%an"', returnStdout: true).trim()
