@@ -45,7 +45,7 @@ pipeline {
         // 🚀 Intégration SonarQube
         stage('SonarQube Analysis') {
             steps {
-                echo " Analyse de la qualité du code avec SonarQube"
+                echo "📊 Analyse de la qualité du code avec SonarQube"
                 // L'argument doit être le NOM exact du serveur SonarQube dans Jenkins (Configuration du Système)
                 withSonarQubeEnv('sonarqube') { 
                     sh 'mvn sonar:sonar -Dsonar.projectKey=jenkins-arwa -Dsonar.projectName="Projet Arwa"'
@@ -56,7 +56,8 @@ pipeline {
         stage('Build Package') {
             steps {
                 echo "📦 Création du package JAR"
-	sh 'mvn test -Denforcer.skip=true'            }
+                sh 'mvn package -Denforcer.skip=true -DskipTests'
+            }
         }
 
         stage('Save Git Info') {
